@@ -1,12 +1,14 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
-export class CheckoutPage {
+export class CheckOutPage {
   private readonly page: Page;
   private readonly firstNameInput: Locator;
   private readonly lastNameInput: Locator;
   private readonly postalCodeInput: Locator;
   private readonly continueButton: Locator;
   private readonly finishButton: Locator;
+  private readonly completeHeader: Locator;      // ADDED
+  private readonly backToProductsButton: Locator; // ADDED
 
   constructor(page: Page) {
     this.page = page;
@@ -16,6 +18,8 @@ export class CheckoutPage {
     this.postalCodeInput = page.locator('[data-test="postalCode"]');
     this.continueButton = page.locator('[data-test="continue"]');
     this.finishButton = page.locator('[data-test="finish"]');
+    this.completeHeader = page.locator('.complete-header');               // ADDED
+    this.backToProductsButton = page.locator('[data-test="back-to-products"]'); // ADDED
   }
 
   // Action: Fill out the shipping form and continue
@@ -36,5 +40,15 @@ export class CheckoutPage {
   // Action: Complete the purchase order
   async completeOrder() {
     await this.finishButton.click();
+  }
+
+  // Action: Verify Checkout is Complete
+  async verifyOrderSuccess() {
+    await expect(this.completeHeader).toHaveText('Thank you for your order!');
+  }
+
+  // Action: Reset and return back to products catalog screen
+  async returnToProducts() {
+    await this.backToProductsButton.click();
   }
 }

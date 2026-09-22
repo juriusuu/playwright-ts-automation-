@@ -1,25 +1,33 @@
-import { Page, Locator } from '@playwright/test';
+import { type Page, type Locator } from '@playwright/test';
 
 export class AddToCart {
-  readonly page: Page;
-  readonly addToCartButton: Locator;
-  readonly shoppingCartLink: Locator;
+  private readonly page: Page;
+  private readonly addToCartButton: Locator;
+  private readonly shoppingCartLink: Locator;
+  private readonly menuButton: Locator;
+  private readonly logoutLink: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.addToCartButton = page.getByRole('button', { name: 'Add to cart' });
     this.shoppingCartLink = page.locator('[data-test="shopping-cart-link"]');
+    this.menuButton = page.getByRole('button', { name: 'Open Menu' });
+    this.logoutLink = page.locator('[data-test="logout-sidebar-link"]');
   }
 
-  // Step 2 Action
-  async addAllItemsToCart(count: number = 6): Promise<void> {
+  async addAllItemsToCart(count: number = 6) {
     for (let i = 0; i < count; i++) {
       await this.addToCartButton.first().click();
     }
   }
 
-  // Transition Action
-  async goToCart(): Promise<void> {
+  async goToCart() {
     await this.shoppingCartLink.click();
+  }
+
+  // This handles the logout part of Step 7
+  async logout() {
+    await this.menuButton.click();
+    await this.logoutLink.click();
   }
 }
