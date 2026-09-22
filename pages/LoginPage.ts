@@ -1,4 +1,5 @@
 import { type Page, type Locator } from '@playwright/test';
+import { ENV } from '../config/env.config'; // 1. IMPORT YOUR CONFIG FILE
 
 export class LoginPage {
   private readonly page: Page;
@@ -12,9 +13,9 @@ export class LoginPage {
     this.passwordInput = page.locator('[data-test="password"]');
   }
 
-  // Action: Navigate to the landing portal
+  // Action: Navigate to the landing portal using configuration data
   async navigate() {
-    await this.page.goto('https://www.saucedemo.com/');
+    await this.page.goto(ENV.urls.baseUrl); // 2. REPLACED HARDCODED URL
   }
 
   // Action: Fill details and execute submission

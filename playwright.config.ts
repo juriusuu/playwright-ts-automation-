@@ -1,14 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
@@ -23,57 +15,55 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
+  
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    /* Collect traces, screenshots, and videos when tests fail to make debugging easier */
+    trace: 'retain-on-failure',         // Retains trace files only for failures
+    screenshot: 'only-on-failure',     // Automatically takes a screenshot on failure
+    video: 'retain-on-failure',        // Automatically records video on failure
+    
+    // Note: Headless mode can be modified here globally or left to default (true)
+    headless: true, 
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        /* Apply your custom common Chromium optimization flags here */
+        launchOptions: {
+          args: [
+            '--disable-smooth-scrolling',
+            '--log-level=3',
+            // Note: Playwright natively launches sandbox-free, isolated, audio-muted profiles already!
+          ]
+        }
+      },
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: { 
+        ...devices['Desktop Firefox'],
+        /* Apply your custom Firefox preference tuning options here */
+        launchOptions: {
+          firefoxUserPrefs: {
+            'browser.cache.disk.enable': false,
+            'browser.cache.memory.enable': false,
+            'browser.cache.offline.enable': false,
+            'network.http.use-cache': false,
+            'dom.ipc.processCount': 1
+          }
+        }
+      },
     },
 
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
-
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
-
-    /* Test against branded browsers. */
-    // {
-    //   name: 'Microsoft Edge',
-    //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-    // },
-    // {
-    //   name: 'Google Chrome',
-    //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    // },
   ],
-
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
 });
