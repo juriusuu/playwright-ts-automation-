@@ -7,48 +7,47 @@ export class CheckOutPage {
   private readonly postalCodeInput: Locator;
   private readonly continueButton: Locator;
   private readonly finishButton: Locator;
-  private readonly completeHeader: Locator;      // ADDED
-  private readonly backToProductsButton: Locator; // ADDED
+  private readonly completeHeader: Locator;
+  private readonly backToProductsButton: Locator;
+  private readonly summaryInfo: Locator;
 
   constructor(page: Page) {
     this.page = page;
-    // Define all checkout screen elements
     this.firstNameInput = page.locator('[data-test="firstName"]');
     this.lastNameInput = page.locator('[data-test="lastName"]');
     this.postalCodeInput = page.locator('[data-test="postalCode"]');
     this.continueButton = page.locator('[data-test="continue"]');
     this.finishButton = page.locator('[data-test="finish"]');
-    this.completeHeader = page.locator('.complete-header');               // ADDED
-    this.backToProductsButton = page.locator('[data-test="back-to-products"]'); // ADDED
+    this.completeHeader = page.locator('.complete-header');
+    this.backToProductsButton = page.locator('[data-test="back-to-products"]');
+    this.summaryInfo = page.locator('.summary_info');
   }
 
-  // Action: Fill out the shipping form and continue
+  // ✅ Action: Fill out the shipping form
   async fillShippingDetails(firstName: string, lastName: string, postalCode: string) {
-    // Keep your WebKit-safe focus clicks here!
-    await this.firstNameInput.click();
     await this.firstNameInput.fill(firstName);
-    
-    await this.lastNameInput.click();
     await this.lastNameInput.fill(lastName);
-    
-    await this.postalCodeInput.click();
     await this.postalCodeInput.fill(postalCode);
-    
     await this.continueButton.click();
   }
 
-  // Action: Complete the purchase order
-  async completeOrder() {
+  // ✅ Assertion: Verify summary page is visible before finishing
+  async assertSummaryVisible(): Promise<void> {
+    await expect(this.summaryInfo).toBeVisible();
+  }
+
+  // ✅ Action: Complete the purchase order
+  async completeOrder(): Promise<void> {
     await this.finishButton.click();
   }
 
-  // Action: Verify Checkout is Complete
-  async verifyOrderSuccess() {
+  // ✅ Assertion: Verify Checkout is Complete
+  async verifyOrderSuccess(): Promise<void> {
     await expect(this.completeHeader).toHaveText('Thank you for your order!');
   }
 
-  // Action: Reset and return back to products catalog screen
-  async returnToProducts() {
+  // ✅ Action: Reset and return back to products catalog
+  async returnToProducts(): Promise<void> {
     await this.backToProductsButton.click();
   }
 }

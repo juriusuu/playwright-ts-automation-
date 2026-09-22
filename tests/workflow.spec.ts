@@ -1,42 +1,110 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { CheckOutPage } from '../pages/CheckOutPage'; 
-import { AddToCart  } from '../pages/AddToCart'; 
+import { AddToCart } from '../pages/AddToCart'; 
 import { CartPage } from '../pages/CartPage';         
-import { ENV } from '../config/env.config'; // 1. IMPORT YOUR CONFIG FILE
+import { ENV } from '../config/env.config'; // <-- Your configuration file
 
-test('Full SauceDemo Purchase Flow with Full POM', async ({ page }) => {
-  // Initialize Page Objects
+// =========================================================================
+// 1. SUCCESSFUL PROFILES LOOP (Standard, Performance Glitch, Visual)
+// =========================================================================
+const successfulUsers = [
+  { label: 'Standard User', username: ENV.user.users.standard },
+  { label: 'Performance Glitch User', username: ENV.user.users.performance },
+  { label: 'Visual User', username: ENV.user.users.visual }
+];
+
+for (const profile of successfulUsers) {
+  test(`Full SauceDemo Purchase Flow - ${profile.label}`, async ({ page }) => {
+    // Initialize Page Objects
+    const loginPage = new LoginPage(page);
+    const checkoutPage = new CheckOutPage(page); 
+    const productsPage = new AddToCart(page);         
+    const cartPage = new CartPage(page);                 
+
+    // 1. Login
+    await loginPage.navigate();
+    await loginPage.login(profile.username, ENV.user.password);
+    await expect(page).toHaveURL(ENV.urls.inventoryUrl);
+
+    // 2. Add All 6 Items
+    await productsPage.addAllItemsToCart(6);
+    await productsPage.goToCart();
+    await cartPage.assertCartCount(6);
+
+    // 3. Checkout
+    await cartPage.proceedToCheckout();
+    await checkoutPage.fillShippingDetails(
+      ENV.checkout.firstName, 
+      ENV.checkout.lastName, 
+      ENV.checkout.postalCode
+    );
+
+    // 4. Complete Order
+    await checkoutPage.completeOrder();
+    await checkoutPage.verifyOrderSuccess();
+
+    // 5. Reset & Logout
+    await checkoutPage.returnToProducts();
+    await productsPage.logout();
+    await expect(page).toHaveURL(ENV.urls.baseUrl);
+  });
+}
+
+// =========================================================================
+// 2. BLOCKED FLOW (Locked Out User)
+// =========================================================================
+test('SauceDemo Flow Block Check - Locked Out User', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.locked, ENV.user.password);
+
+  const errorContainer = page.locator('[data-test="error"]');
+  await expect(errorContainer).toHaveText(ENV.user.expectedMessages.lockedOut);
+});
+
+// =========================================================================
+// 3. KNOWN BUG PROFILES (Problem & Error Users)
+// =========================================================================
+test('SauceDemo Purchase Flow Defect Profiling - Problem User', async ({ page }) => {
+  test.fail(); // Expect failure, keeps pipeline green
+
   const loginPage = new LoginPage(page);
   const checkoutPage = new CheckOutPage(page); 
   const productsPage = new AddToCart(page);         
   const cartPage = new CartPage(page);                 
 
-  // 1. Login (Updated to use configuration variables)
   await loginPage.navigate();
-  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+  await loginPage.login(ENV.user.users.problem, ENV.user.password);
 
-  // 2. Add All 6 Items to Cart
-  await productsPage.addAllItemsToCart(6);
+  await productsPage.addAllItemsToCart(6); 
   await productsPage.goToCart();
-
-  // 3. Navigate to Checkout
   await cartPage.proceedToCheckout();
-  
-  // 4. Fill Information (Updated to use configuration text values)
   await checkoutPage.fillShippingDetails(
     ENV.checkout.firstName, 
     ENV.checkout.lastName, 
     ENV.checkout.postalCode
   );
+});
 
-  // 5. Review & Finish Order
-  await checkoutPage.completeOrder();
+test('SauceDemo Purchase Flow Defect Profiling - Error User', async ({ page }) => {
+  test.fail(); // Expect failure, keeps pipeline green
 
-  // 6. Verify Checkout is Complete
-  await checkoutPage.verifyOrderSuccess();
+  const loginPage = new LoginPage(page);
+  const checkoutPage = new CheckOutPage(page); 
+  const productsPage = new AddToCart(page);         
+  const cartPage = new CartPage(page);                 
 
-  // 7. Reset and Logout
-  await checkoutPage.returnToProducts();
-  await productsPage.logout();
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.error, ENV.user.password);
+
+  await productsPage.addAllItemsToCart(6);
+  await productsPage.goToCart();
+  await cartPage.proceedToCheckout();
+  await checkoutPage.fillShippingDetails(
+    ENV.checkout.firstName, 
+    ENV.checkout.lastName, 
+    ENV.checkout.postalCode
+  );
 });
