@@ -1,26 +1,23 @@
 import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage'; // Imports your new class object
 
-test('Full SauceDemo Purchase Flow', async ({ page }) => {
-  // 1. Login
-  await page.goto('https://www.saucedemo.com/');
-  await page.locator('[data-test="username"]').fill('standard_user');
-  await page.locator('[data-test="password"]').fill('secret_sauce');
-  await page.locator('[data-test="password"]').press('Enter');
+test('Full SauceDemo Purchase Flow with POM & Dynamic Loop', async ({ page }) => {
+  // 1. Initialize the Page Object and Login
+  const loginPage = new LoginPage(page);
+  await loginPage.navigate();
+  await loginPage.login('standard_user', 'secret_sauce');
 
-  // 2. Add All 6 Items to Cart
-  await page.locator('[data-test="add-to-cart-sauce-labs-backpack"]').click();
-  await page.locator('[data-test="add-to-cart-sauce-labs-bike-light"]').click();
-  await page.locator('[data-test="add-to-cart-sauce-labs-fleece-jacket"]').click();
-  await page.locator('[data-test="add-to-cart-sauce-labs-bolt-t-shirt"]').click();
-  await page.locator('[data-test="add-to-cart-test\\.allthethings\\(\\)-t-shirt-\\(red\\)"]').click();
-  await page.locator('[data-test="add-to-cart-sauce-labs-onesie"]').click();
+  // 2. Add All 6 Items to Cart (Using the First-Button Loop Trick)
+  for (let i = 0; i < 6; i++) {
+    await page.getByRole('button', { name: 'Add to cart' }).first().click();
+  }
 
   // 3. Checkout Journey
   await page.locator('[data-test="shopping-cart-link"]').click();
   await page.locator('[data-test="checkout"]').click();
   
-  // 4. Fill Information
- await page.locator('[data-test="firstName"]').click(); // Force focus first
+  // 4. Fill Information (With WebKit specific focus clicks)
+  await page.locator('[data-test="firstName"]').click();
   await page.locator('[data-test="firstName"]').fill('Test');
   
   await page.locator('[data-test="lastName"]').click();
