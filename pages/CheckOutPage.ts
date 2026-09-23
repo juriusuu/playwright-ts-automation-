@@ -30,29 +30,29 @@ export class CheckOutPage {
     await this.postalCodeInput.fill(postalCode);
     await this.continueButton.click();
   }
-//   async fillShippingDetails(firstName: string, lastName: string, postalCode: string) {
-//   // Fill inputs
-//   await this.firstNameInput.fill(firstName);
-//   await this.lastNameInput.fill(lastName);
-//   await this.postalCodeInput.fill(postalCode);
+  async fillShippingDetailsisGuarded(firstName: string, lastName: string, postalCode: string) {
+  // Fill inputs
+  await this.firstNameInput.fill(firstName);
+  await this.lastNameInput.fill(lastName);
+  await this.postalCodeInput.fill(postalCode);
 
-//   // ✅ Verify values are actually set
-//   await expect(this.firstNameInput).toHaveValue(firstName);
-//   await expect(this.lastNameInput).toHaveValue(lastName);
-//   await expect(this.postalCodeInput).toHaveValue(postalCode);
+  // ✅ Verify values are actually set
+  await expect(this.firstNameInput).toHaveValue(firstName);
+  await expect(this.lastNameInput).toHaveValue(lastName);
+  await expect(this.postalCodeInput).toHaveValue(postalCode);
 
-//   // ✅ Guard: wait until Continue button is enabled
-//   await expect(this.continueButton).toBeEnabled();
+  // ✅ Guard: wait until Continue button is enabled
+  await expect(this.continueButton).toBeEnabled();
 
-//   // Click Continue
-//   await this.continueButton.click();
+  // Click Continue
+  await this.continueButton.click();
 
-//   // ✅ Optional: check for error messages
-//   const errorContainer = this.page.locator('[data-test="error"]');
-//   if (await errorContainer.isVisible()) {
-//     throw new Error(`Checkout failed: ${await errorContainer.textContent()}`);
-//   }
-// }
+  // ✅ Optional: check for error messages
+  const errorContainer = this.page.locator('[data-test="error"]');
+  if (await errorContainer.isVisible()) {
+    throw new Error(`Checkout failed: ${await errorContainer.textContent()}`);
+  }
+}
   // ✅ Assertion: Verify summary page is visible before finishing
   async assertSummaryVisible(): Promise<void> {
     await expect(this.summaryInfo).toBeVisible();

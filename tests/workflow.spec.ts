@@ -34,7 +34,7 @@ for (const profile of successfulUsers) {
 
     // 3. Checkout
     await cartPage.proceedToCheckout();
-    await checkoutPage.fillShippingDetails(
+    await checkoutPage.fillShippingDetailsisGuarded(
       ENV.checkout.firstName, 
       ENV.checkout.lastName, 
       ENV.checkout.postalCode
