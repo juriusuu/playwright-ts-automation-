@@ -107,4 +107,37 @@ test('SauceDemo Purchase Flow Defect Profiling - Error User', async ({ page }) =
     ENV.checkout.lastName, 
     ENV.checkout.postalCode
   );
+
+});  // ✅ close Error User test here
+
+// =========================================================================
+// 4. SMOKE TEST
+// =========================================================================
+test('Smoke Test - Login and Logout', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const productsPage = new AddToCart(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+  await expect(page).toHaveURL(ENV.urls.inventoryUrl);
+
+  await productsPage.logout();
+  await expect(page).toHaveURL(ENV.urls.baseUrl);
+});
+
+// =========================================================================
+// 5. VISUAL REGRESSION TEST
+// =========================================================================
+test('Visual Regression - Inventory Page', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.visual, ENV.user.password);
+  await expect(page).toHaveURL(ENV.urls.inventoryUrl);
+
+  await page.waitForLoadState('networkidle');
+
+  await expect(page).toHaveScreenshot('inventory-visual.png', {
+    maxDiffPixelRatio: 0.05,
+  });
 });
