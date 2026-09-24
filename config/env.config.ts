@@ -32,10 +32,24 @@ const checkoutData = Object.freeze({
     postalCode: "12345"
 });
 
+const productsData = Object.freeze({
+  backpack: "Sauce Labs Backpack",
+  bikeLight: "Sauce Labs Bike Light",
+  boltTShirt: "Sauce Labs Bolt T-Shirt",
+  fleeceJacket: "Sauce Labs Fleece Jacket",
+  onesie: "Sauce Labs Onesie",
+  redTShirt: "Test.allTheThings() T-Shirt (Red)"
+});
+
+
 // TypeScript automatically infers the types perfectly because of as const / Object.freeze
 export const ENV = Object.freeze({
     title: "Swag Labs",
     urls: urls,
     user: userData,
-    checkout: checkoutData
-});
+    checkout: checkoutData,
+    products: productsData   // ✅ add this
+}
+);
+
+

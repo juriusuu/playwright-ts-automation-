@@ -141,3 +141,120 @@ test('Visual Regression - Inventory Page', async ({ page }) => {
     maxDiffPixelRatio: 0.05,
   });
 });
+
+// =========================================================================
+// 6. NEGATIVE TESTS
+// =========================================================================
+// ❌ Negative Test: Checkout fails without postal code
+test('@negative Checkout fails without postal code', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const checkoutPage = new CheckOutPage(page);
+  const productsPage = new AddToCart(page);
+  const cartPage = new CartPage(page);
+
+  // Login with Standard User
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+
+  // Add 1 item to cart
+  await productsPage.addAllItemsToCart(1);
+  await productsPage.goToCart();
+  await cartPage.proceedToCheckout();
+
+  // Leave postal code empty → expect error
+  await checkoutPage.fillShippingDetails(ENV.checkout.firstName, ENV.checkout.lastName, '');
+  const errorContainer = page.locator('[data-test="error"]');
+  await expect(errorContainer).toHaveText('Error: Postal Code is required');
+});
+
+
+// =========================================================================
+// 7. BOUNDARY TESTS
+// =========================================================================
+// 🔎 Boundary Test: Add and remove items from cart
+test('@boundary Add and remove items from cart', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const productsPage = new AddToCart(page);
+  const cartPage = new CartPage(page);
+
+  // Login
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+
+  // Add 1 item → assert badge count
+  await productsPage.addAllItemsToCart(1);
+  await cartPage.assertCartCount(1);
+
+  // Remove item → assert cart empty
+  await cartPage.removeItemFromCart("backpack");
+  await cartPage.assertCartCount(0);
+});
+
+// =========================================================================
+// 8. UI TESTS
+// =========================================================================
+
+// 🎨 UI Test: Visual regression on Cart Page
+// test('@ui Visual Regression - Cart Page', async ({ page }) => {
+//   const loginPage = new LoginPage(page);
+//   const productsPage = new AddToCart(page);
+
+//   // Login with Visual User
+//   await loginPage.navigate();
+//   await loginPage.login(ENV.user.users.visual, ENV.user.password);
+
+//   // Add 2 items → go to cart
+//   await productsPage.addAllItemsToCart(2);
+//   await productsPage.goToCart();
+
+//   // Screenshot comparison
+//   await page.waitForLoadState('networkidle');
+//   await expect(page).toHaveScreenshot('cart-visual.png', { maxDiffPixelRatio: 0.05 });
+// });
+// 🎨 UI Test: Visual regression on Cart Page (Standard User)
+test('@ui Visual Regression - Cart Page (Standard User)', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const productsPage = new AddToCart(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+
+  await productsPage.addAllItemsToCart(2);
+  await productsPage.goToCart();
+
+  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveScreenshot('cart-standard.png', { maxDiffPixelRatio: 0.05 });
+});
+
+// 🎨 UI Test: Visual regression on Cart Page (Visual User)
+test('@ui Visual Regression - Cart Page (Visual User)', async ({ page }) => {
+  test.fail(); // ✅ mark as defect profile
+  const loginPage = new LoginPage(page);
+  const productsPage = new AddToCart(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.visual, ENV.user.password);
+
+  await productsPage.addAllItemsToCart(2);
+  await productsPage.goToCart();
+
+  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveScreenshot('cart-visual.png', { maxDiffPixelRatio: 0.05 });
+});
+
+// 🎨 UI Test: Visual regression on Cart Page (Problem User)
+test('@ui Visual Regression - Cart Page (Problem User)', async ({ page }) => {
+  test.fail(); // ✅ expected defect
+  const loginPage = new LoginPage(page);
+  const productsPage = new AddToCart(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.problem, ENV.user.password);
+
+  await productsPage.addAllItemsToCart(2);
+  await productsPage.goToCart();
+
+  await page.waitForLoadState('networkidle');
+  await expect(page).toHaveScreenshot('cart-problem.png', { maxDiffPixelRatio: 0.05 });
+});
+// ====
