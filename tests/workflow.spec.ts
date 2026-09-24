@@ -290,3 +290,102 @@ test('@uat User removes item before checkout', async ({ page }) => {
   await checkoutPage.completeOrder();
   await checkoutPage.verifyOrderSuccess();
 });
+
+
+// =========================================================================
+// 10. PERFORMANCE TESTS
+// =========================================================================
+// ⚡ Performance Test: Checkout duration for Performance Glitch User
+// test('@performance Checkout duration for Performance Glitch User', async ({ page }) => {
+//   const loginPage = new LoginPage(page);
+//   const checkoutPage = new CheckOutPage(page);
+//   const productsPage = new AddToCart(page);
+//   const cartPage = new CartPage(page);
+
+//   // Login with Performance Glitch User
+//   await loginPage.navigate();
+//   await loginPage.login(ENV.user.users.performance, ENV.user.password);
+
+//   // Add 3 items → proceed to checkout
+//   await productsPage.addAllItemsToCart(3);
+//   await productsPage.goToCart();
+//   await cartPage.proceedToCheckout();
+
+//   // Measure checkout duration
+//   const start = Date.now();
+//   await checkoutPage.fillShippingDetailsisGuarded(
+//     ENV.checkout.firstName, ENV.checkout.lastName, ENV.checkout.postalCode
+//   );
+//   await checkoutPage.completeOrder();
+//   const duration = Date.now() - start;
+
+//   // Assert checkout completes under threshold (e.g., 5s)
+//   expect(duration).toBeLessThan(1000);
+// });
+
+
+// test('@performance Checkout duration for Performance Glitch User', async ({ page }) => {
+//   const loginPage = new LoginPage(page);
+//   const checkoutPage = new CheckOutPage(page);
+//   const productsPage = new AddToCart(page);
+//   const cartPage = new CartPage(page);
+
+//   // Measure the full journey (login → add items → checkout)
+//   const start = Date.now();
+
+//   // Login with Performance Glitch User
+//   await loginPage.navigate();
+//   await loginPage.login(ENV.user.users.performance, ENV.user.password);
+
+//   // Add 3 items → proceed to checkout
+//   await productsPage.addAllItemsToCart(3);
+//   await productsPage.goToCart();
+//   await cartPage.proceedToCheckout();
+
+//   // Fill shipping details and complete order
+//   await checkoutPage.fillShippingDetailsisGuarded(
+//     ENV.checkout.firstName,
+//     ENV.checkout.lastName,
+//     ENV.checkout.postalCode
+//   );
+//   await checkoutPage.completeOrder();
+
+//   // Stop timer
+//   const duration = Date.now() - start;
+//   console.log(`Checkout duration: ${duration}ms`);
+
+//   // Assert threshold (set realistically to catch glitch)
+//   expect(duration).toBeLessThan(5000);
+// });
+
+test('@performance Compare Standard vs Glitch User', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const checkoutPage = new CheckOutPage(page);
+  const productsPage = new AddToCart(page);
+  const cartPage = new CartPage(page);
+
+  async function measureCheckout(user: string) {
+    const start = Date.now();
+    await loginPage.navigate();
+    await loginPage.login(user, ENV.user.password);
+    await productsPage.addAllItemsToCart(3);
+    await productsPage.goToCart();
+    await cartPage.proceedToCheckout();
+    await checkoutPage.fillShippingDetailsisGuarded(
+      ENV.checkout.firstName,
+      ENV.checkout.lastName,
+      ENV.checkout.postalCode
+    );
+    await checkoutPage.completeOrder();
+    return Date.now() - start;
+  }
+
+  const standardDuration = await measureCheckout(ENV.user.users.standard);
+  const glitchDuration = await measureCheckout(ENV.user.users.performance);
+
+  console.log(`Standard user checkout: ${standardDuration}ms`);
+  console.log(`Performance glitch user checkout: ${glitchDuration}ms`);
+
+  expect(standardDuration).toBeLessThan(2000);   // ✅ baseline fast
+  expect(glitchDuration).toBeLessThan(5000);    // ⚡ will likely fail
+});
