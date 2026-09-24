@@ -7,6 +7,17 @@ export class CartPage {
   readonly cartItems: Locator;
   readonly continueShoppingButton: Locator;
 
+    private static readonly productSelectors: Record<string, string> = {
+    backpack: "backpack",
+    bikeLight: "bike-light",
+    boltTShirt: "bolt-t-shirt",
+    fleeceJacket: "fleece-jacket",
+    onesie: "onesie",
+    redTShirt: "test.allthethings()-t-shirt-(red)"
+  };
+
+  
+
   constructor(page: Page) {
     this.page = page;
     this.checkoutButton = page.locator('[data-test="checkout"]');
@@ -41,17 +52,27 @@ export class CartPage {
     await expect(this.cartItems).toHaveCount(expected);
   }
 
+
+
+  async removeItemFromCart(productKey: keyof typeof CartPage.productSelectors): Promise<void> {
+    const selector = CartPage.productSelectors[productKey];
+    const removeButton = this.page.locator(`[data-test="remove-sauce-labs-${selector}"]`);
+    await removeButton.click();
+  }
+
+}
+
   // // ✅ Action: Remove item from cart by product name
   // async removeItemFromCart(productName: string): Promise<void> {
   //   const removeButton = this.page.locator(`.cart_item:has-text("${productName}") button`);
   //   await removeButton.click();
   // }
 
-  // ✅ Action: Remove item from cart by product key
-async removeItemFromCart(productKey: string): Promise<void> {
-  // Example: productKey = "backpack" → matches data-test="remove-sauce-labs-backpack"
-  const removeButton = this.page.locator(`[data-test="remove-sauce-labs-${productKey}"]`);
-  await removeButton.click();
-}
 
-}
+
+  // ✅ Action: Remove item from cart by product key
+// async removeItemFromCart(productKey: string): Promise<void> {
+//   // Example: productKey = "backpack" → matches data-test="remove-sauce-labs-backpack"
+//   const removeButton = this.page.locator(`[data-test="remove-sauce-labs-${productKey}"]`);
+//   await removeButton.click();
+// }

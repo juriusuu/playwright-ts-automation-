@@ -4,6 +4,7 @@ import { CheckOutPage } from '../pages/CheckOutPage';
 import { AddToCart } from '../pages/AddToCart'; 
 import { CartPage } from '../pages/CartPage';         
 import { ENV } from '../config/env.config'; // <-- Your configuration file
+import { backup } from 'node:sqlite';
 
 // =========================================================================
 // 1. SUCCESSFUL PROFILES LOOP (Standard, Performance Glitch, Visual)
@@ -258,3 +259,34 @@ test('@ui Visual Regression - Cart Page (Problem User)', async ({ page }) => {
   await expect(page).toHaveScreenshot('cart-problem.png', { maxDiffPixelRatio: 0.05 });
 });
 // ====
+
+// =========================================================================
+// 9. UAT TESTS
+// =========================================================================
+
+// 👥 UAT Test: User removes item before checkout
+test('@uat User removes item before checkout', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const checkoutPage = new CheckOutPage(page);
+  const productsPage = new AddToCart(page);
+  const cartPage = new CartPage(page);
+
+  await loginPage.navigate();
+  await loginPage.login(ENV.user.users.standard, ENV.user.password);
+
+  await productsPage.addAllItemsToCart(2);
+  await productsPage.goToCart();
+
+  // ✅ Remove one item by name
+  await cartPage.removeItemFromCart("bikeLight");
+  await cartPage.assertCartCount(1);
+
+  await cartPage.proceedToCheckout();
+  await checkoutPage.fillShippingDetailsisGuarded(
+    ENV.checkout.firstName,
+    ENV.checkout.lastName,
+    ENV.checkout.postalCode
+  );
+  await checkoutPage.completeOrder();
+  await checkoutPage.verifyOrderSuccess();
+});
