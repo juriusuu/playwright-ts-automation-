@@ -1,2 +1,0 @@
-Standard user checkout: 2757ms
-Performance glitch user checkout: 6668ms

@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test:clean": "rimraf allure-results && playwright test"
+  },
   "keywords": [],
   "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.2",
-    "allure-playwright": "^3.12.2"
+    "allure-commandline": "^2.46.1",
+    "allure-playwright": "^3.12.2",
+    "rimraf": "^6.1.3"
   }
 }
